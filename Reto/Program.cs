@@ -11,7 +11,7 @@ var config = builder.Configuration;
 var key = config["Jwt:Key"];
 var audience = config["Jwt:Audience"];
 var issuer = config["Jwt:Issuer"];
-var connString = config["ConnectionStrings:SQL"];
+var connString = config["ConnectionStrings:SQLServer"];
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();

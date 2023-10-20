@@ -23,24 +23,26 @@ namespace CaritasReliefAPI
         [UseProjection]
         [UseFiltering]
         [UseSorting]
-        public IQueryable<Donantes> GetDonantes(SQLContext sqlContext)
-            => sqlContext.Donantes.AsQueryable();
-
-        [UseProjection]
-        [UseFiltering]
-        [UseSorting]
-        public IQueryable<Recolectores> GetRecolectores(SQLContext sqlContext)
-            => sqlContext.Recolectores.AsQueryable();
-
-        [UseProjection]
-        [UseFiltering]
-        [UseSorting]
-        public IQueryable<Recolectores> GetRecolectoresById(SQLContext sqlContext, int id)
+        public IQueryable<Donantes> GetDonantes(SQLContext sqlContext, int? id = null)
         {
-            return sqlContext.Recolectores.Where(r => r.idRecolector == id).AsQueryable();
+            if (id == null)
+                return sqlContext.Donantes.AsQueryable();
+
+            return sqlContext.Donantes.Where(d => d.idDonante == id);
         }
 
-        public async Task<HttpStatusCode> CobrarRecibo (SQLContext sqlContext, int id)
+        [UseProjection]
+        [UseFiltering]
+        [UseSorting]
+        public IQueryable<Recolectores> GetRecolectores(SQLContext sqlContext, int? id = null)
+        {
+            if (id == null) 
+                return sqlContext.Recolectores.AsQueryable();
+
+            return sqlContext.Recolectores.Where(r => r.idRecolector == id);
+        }
+
+        public async Task<HttpStatusCode> CobrarRecibo(SQLContext sqlContext, int id)
         {
             var recibo = await sqlContext.Recibos.FindAsync(id);
 
