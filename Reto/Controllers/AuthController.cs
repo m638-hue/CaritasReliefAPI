@@ -1,3 +1,7 @@
+using System;
+using System.Runtime.Intrinsics.Arm;
+using System.Text;
+using System.Security.Cryptography;
 using CaritasReliefAPI.DBContext;
 using CaritasReliefAPI.Schema;
 using Microsoft.AspNetCore.Authorization;
@@ -23,9 +27,10 @@ namespace Reto.Controllers
             [FromBody] Credentials creds,
             [FromServices] SQLContext context)
         {
+            var passHashed = ComputeSHA256(creds.password);
             var login = context.Logins.Where(x => 
                 x.usuario == creds.username && 
-                x.contrasena ==  creds.password)
+                x.contrasena ==  passHashed)
                 .FirstOrDefault();
 
             if (login != null)
@@ -54,6 +59,26 @@ namespace Reto.Controllers
             }
 
             return Unauthorized("Incorrect user or password");
+        }
+
+        public static string ComputeSHA256(string s)
+        {
+            string hash = String.Empty;
+
+            // Initialize a SHA256 hash object
+            using (SHA256 sha256 = SHA256.Create())
+            {
+                // Compute the hash of the given string
+                byte[] hashValue = sha256.ComputeHash(Encoding.UTF8.GetBytes(s));
+
+                // Convert the byte array to string format
+                foreach (byte b in hashValue)
+                {
+                    hash += $"{b:X2}";
+                }
+            }
+
+            return hash;
         }
     }
 }
