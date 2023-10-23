@@ -1,5 +1,6 @@
 using CaritasReliefAPI;
 using CaritasReliefAPI.DBContext;
+using CaritasReliefAPI.Extensions;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
@@ -25,6 +26,7 @@ builder.Services
     .AddGraphQLServer()
     .RegisterDbContext<SQLContext>(DbContextKind.Resolver)
     .AddQueryType<Query>()
+    .AddTypeExtension<DonanteExtension>()
     .AddSorting()
     .AddFiltering()
     .AddProjections()

@@ -55,6 +55,19 @@ namespace CaritasReliefAPI
             return HttpStatusCode.OK;
         }
 
+        public async Task<HttpStatusCode> PostponerRecibo(SQLContext sqlContext, int id, string comentario)
+        {
+            var recibo = await sqlContext.Recibos.FindAsync(id);
+
+            if (recibo == null)
+                return HttpStatusCode.InternalServerError;
+
+            recibo.comentarios = comentario;
+            sqlContext.SaveChanges();
+
+            return HttpStatusCode.OK;
+        }
+
         [UseProjection]
         [UseFiltering]
         [UseSorting]
@@ -66,5 +79,17 @@ namespace CaritasReliefAPI
                 .Select(r => r.donante)
                 .Distinct();
         }
+
+        public int GetCantidadRecibos(SQLContext sqlContext, string date, int idRecolector, int idDonante)
+        {
+            return sqlContext.Recibos
+                .Where(r => 
+                    r.fecha.Date.ToString() == date &&
+                    r.idRecolector == idRecolector &&
+                    r.idDonante == idDonante &&
+                    !r.cobrado)
+                .Count();
+        }
+
     }
 }
