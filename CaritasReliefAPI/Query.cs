@@ -1,7 +1,7 @@
 ﻿using CaritasReliefAPI.DBContext;
 using CaritasReliefAPI.Schema;
 using HotChocolate.Authorization;
-using Microsoft.IdentityModel.Tokens;
+using Microsoft.EntityFrameworkCore;
 using System.Net;
 
 namespace CaritasReliefAPI
@@ -64,7 +64,7 @@ namespace CaritasReliefAPI
                 .Where(r => r.fecha.Date.ToString() == date)
                 .Where(r => r.idRecolector == idRecolector)
                 .Select(r => r.donante)
-                .AsQueryable();
+                .Distinct();
         }
     }
 }
