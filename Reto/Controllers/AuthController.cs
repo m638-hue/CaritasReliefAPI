@@ -6,6 +6,7 @@ using CaritasReliefAPI.DBContext;
 using CaritasReliefAPI.Schema;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Reto.Controllers
 {
@@ -22,8 +23,8 @@ namespace Reto.Controllers
             _jwtService = jwtService;
         }
 
-        [HttpPost("login")]
-        public IActionResult auth(
+        [HttpPost("login/user")]
+        public IActionResult authUser(
             [FromBody] Credentials creds,
             [FromServices] SQLContext context)
         {
@@ -37,19 +38,12 @@ namespace Reto.Controllers
             {
                 var role = login.tipo == 2 ? Role.admin : Role.user;
                 var token = _jwtService.GenerateToken(creds, role);
-                object user;
-
-                if (role == Role.admin)
-                    user = context.Admins
-                        .Where(a => a.idLogin == login.idLogin)
-                        .Select(a => a.idAdmin);
-
-                else
-                    user = context.Recolectores
+                var user =
+                    context.Recolectores
                         .Where(r => r.idLogin == login.idLogin)
                         .Select(r => r.idRecolector);
 
-                if (user != null)
+                if (!user.IsNullOrEmpty())
                     return Ok(new
                     {
                         token,
@@ -60,6 +54,39 @@ namespace Reto.Controllers
 
             return Unauthorized("Incorrect user or password");
         }
+
+        [HttpPost("login/admin")]
+        public IActionResult auth(
+            [FromBody] Credentials creds,
+            [FromServices] SQLContext context)
+        {
+            var passHashed = ComputeSHA256(creds.password);
+            var login = context.Logins.Where(x =>
+                x.usuario == creds.username &&
+                x.contrasena == passHashed)
+                .FirstOrDefault();
+
+            if (login != null)
+            {
+                var role = login.tipo == 2 ? Role.admin : Role.user;
+                var token = _jwtService.GenerateToken(creds, role);
+                var user =
+                    context.Admins
+                        .Where(r => r.idLogin == login.idLogin)
+                        .Select(r => r.idAdmin);
+
+                if (!user.IsNullOrEmpty())
+                    return Ok(new
+                    {
+                        token,
+                        role,
+                        user
+                    });
+            }
+
+            return Unauthorized("Incorrect user or password");
+        }
+
 
         public static string ComputeSHA256(string s)
         {

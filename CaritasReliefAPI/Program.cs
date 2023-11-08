@@ -30,7 +30,10 @@ builder.Services
     .AddSorting()
     .AddFiltering()
     .AddProjections()
-    .AddAuthorization();
+    .AddAuthorization(options =>
+    {
+        options.AddPolicy("admin", policy => policy.RequireRole("admin"));
+    });
 
 
 builder.Services

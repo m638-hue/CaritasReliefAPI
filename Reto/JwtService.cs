@@ -35,7 +35,7 @@ namespace Reto
                 new Claim(JwtRegisteredClaimNames.Sub, credentials.username),
                 new Claim(JwtRegisteredClaimNames.Iat, DateTime.UtcNow.ToString()),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                new Claim("role", role.ToString())
+                new Claim(ClaimTypes.Role, role.ToString())
             };
 
             var token = new JwtSecurityToken(

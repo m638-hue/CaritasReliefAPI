@@ -1,6 +1,7 @@
 ﻿using CaritasReliefAPI.DBContext;
 using CaritasReliefAPI.Schema;
 using HotChocolate.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.Net;
 
@@ -16,7 +17,7 @@ namespace CaritasReliefAPI
         {
             if (id == null)
                 return sqlContext.Recibos.AsQueryable();
-            
+
             return sqlContext.Recibos.AsQueryable().Where(x => x.idRecibo == id);
         }
 
@@ -36,7 +37,7 @@ namespace CaritasReliefAPI
         [UseSorting]
         public IQueryable<Recolectores> GetRecolectores(SQLContext sqlContext, int? id = null)
         {
-            if (id == null) 
+            if (id == null)
                 return sqlContext.Recolectores.AsQueryable();
 
             return sqlContext.Recolectores.Where(r => r.idRecolector == id);
@@ -68,6 +69,7 @@ namespace CaritasReliefAPI
             return HttpStatusCode.OK;
         }
 
+        [Authorize(Roles = new string[] {"admin"})]
         [UseProjection]
         [UseFiltering]
         [UseSorting]
