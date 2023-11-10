@@ -17,7 +17,7 @@ namespace CaritasReliefAPI.Schema
 
         public decimal cantidad { get; set; }  
 
-        public bool cobrado { get; set; }  
+        public int cobrado { get; set; }  
 
         public string comentarios { get; set; }
 

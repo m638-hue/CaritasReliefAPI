@@ -6,16 +6,17 @@ namespace CaritasReliefAPI.Extensions
     [ExtendObjectType(typeof(Recolectores))]
     public class RecolectorExtensions
     {
+        [UseProjection]
+        [UseFiltering]
+        [UseSorting]
         public IQueryable<Recibos> GetRecibosActivos(
             [Parent] Recolectores recolector,
             SQLContext sqlContext,
-            string date,
-            int idRecolector)
+            string date)
         {
             return sqlContext.Recibos
                 .Where(r =>
-                    r.idDonante == recolector.idRecolector &&
-                    r.idRecolector == idRecolector &&
+                    r.idRecolector == recolector.idRecolector &&
                     r.fecha.Date.ToString() == date);
         }
     }

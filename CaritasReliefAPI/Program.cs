@@ -27,6 +27,7 @@ builder.Services
     .RegisterDbContext<SQLContext>(DbContextKind.Resolver)
     .AddQueryType<Query>()
     .AddTypeExtension<DonanteExtension>()
+    .AddTypeExtension<RecolectorExtensions>()
     .AddSorting()
     .AddFiltering()
     .AddProjections()

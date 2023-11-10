@@ -8,7 +8,7 @@ using System.Net;
 namespace CaritasReliefAPI
 {
     [Authorize]
-    public class Query
+    public partial class Query
     {
         [UseProjection]
         [UseFiltering]
@@ -35,12 +35,15 @@ namespace CaritasReliefAPI
         [UseProjection]
         [UseFiltering]
         [UseSorting]
-        public IQueryable<Recolectores> GetRecolectores(SQLContext sqlContext, int? id = null)
+        public IQueryable<Recolectores> GetRecolectores(SQLContext sqlContext)
         {
-            if (id == null)
-                return sqlContext.Recolectores.AsQueryable();
+            return sqlContext.Recolectores.AsQueryable();
+        }
 
-            return sqlContext.Recolectores.Where(r => r.idRecolector == id);
+        [UseProjection]
+        public async Task<Recolectores?> GetRecolector(SQLContext context, int id)
+        {
+            return await context.Recolectores.FindAsync(id);
         }
 
         public async Task<HttpStatusCode> CobrarRecibo(SQLContext sqlContext, int id)
@@ -50,7 +53,7 @@ namespace CaritasReliefAPI
             if (recibo == null)
                 return HttpStatusCode.InternalServerError;
 
-            recibo.cobrado = true;
+            recibo.cobrado = 1;
             sqlContext.SaveChanges();
 
             return HttpStatusCode.OK;
@@ -64,12 +67,12 @@ namespace CaritasReliefAPI
                 return HttpStatusCode.InternalServerError;
 
             recibo.comentarios = comentario;
+            recibo.cobrado = 0;
             sqlContext.SaveChanges();
 
             return HttpStatusCode.OK;
         }
 
-        [Authorize(Roles = new string[] {"admin"})]
         [UseProjection]
         [UseFiltering]
         [UseSorting]
@@ -89,7 +92,7 @@ namespace CaritasReliefAPI
                     r.fecha.Date.ToString() == date &&
                     r.idRecolector == idRecolector &&
                     r.idDonante == idDonante &&
-                    !r.cobrado)
+                    r.cobrado == 0)
                 .Count();
         }
 

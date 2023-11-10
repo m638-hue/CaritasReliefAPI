@@ -17,10 +17,11 @@ namespace CaritasReliefAPI.Extensions
                     r.idDonante == donante.idDonante &&
                     r.idRecolector == idRecolector &&
                     r.fecha.Date.ToString() == date &&
-                    !r.cobrado)
+                    r.cobrado == 0)
                 .Count();
         }
 
+        [UseProjection]
         public IQueryable<Recibos> GetRecibosActivos(
             [Parent] Donantes donante,
             SQLContext sqlContext,
@@ -32,7 +33,7 @@ namespace CaritasReliefAPI.Extensions
                     r.idDonante == donante.idDonante &&
                     r.idRecolector == idRecolector &&
                     r.fecha.Date.ToString() == date &&
-                   !r.cobrado);
+                   r.cobrado == 0);
         }
     }
 }
