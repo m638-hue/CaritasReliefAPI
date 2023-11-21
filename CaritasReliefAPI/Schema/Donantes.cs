@@ -17,6 +17,10 @@ namespace CaritasReliefAPI.Schema
 
         public string referenciaDomicilio { get; set; }
 
+        public string latitude { get; set; }
+
+        public string longitude { get; set; }
+
         public string telCasa { get; set; }
 
         public string telCelular { get; set; }
