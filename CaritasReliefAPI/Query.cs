@@ -16,9 +16,9 @@ namespace CaritasReliefAPI
         public IQueryable<Recibos> GetRecibos(SQLContext sqlContext, int? id = null)
         {
             if (id == null)
-                return sqlContext.Recibos.AsQueryable();
+                return sqlContext.Recibos;
 
-            return sqlContext.Recibos.AsQueryable().Where(x => x.idRecibo == id);
+            return sqlContext.Recibos.Where(x => x.idRecibo == id);
         }
 
         [UseProjection]
@@ -53,7 +53,7 @@ namespace CaritasReliefAPI
             if (recibo == null)
                 return HttpStatusCode.InternalServerError;
 
-            recibo.cobrado = 1;
+            recibo.cobrado = (int) EstadoRecibo.cobrado;
             sqlContext.SaveChanges();
 
             return HttpStatusCode.OK;
@@ -67,34 +67,22 @@ namespace CaritasReliefAPI
                 return HttpStatusCode.InternalServerError;
 
             recibo.comentarios = comentario;
-            recibo.cobrado = 0;
+            recibo.cobrado = (int) EstadoRecibo.fallido;
             sqlContext.SaveChanges();
 
             return HttpStatusCode.OK;
         }
 
-        [UseProjection]
-        [UseFiltering]
-        [UseSorting]
-        public IQueryable<Donantes> GetDonantesHoy(SQLContext sqlContext, string date, int idRecolector)
+        public async Task<HttpStatusCode> ActualizarOrden(SQLContext sqlContext, int id, int pos)
         {
-            return sqlContext.Recibos
-                .Where(r => r.fecha.Date.ToString() == date)
-                .Where(r => r.idRecolector == idRecolector)
-                .Select(r => r.donante)
-                .Distinct();
-        }
+            var recibo = await sqlContext.Recibos.FindAsync(id);
 
-        public int GetCantidadRecibos(SQLContext sqlContext, string date, int idRecolector, int idDonante)
-        {
-            return sqlContext.Recibos
-                .Where(r => 
-                    r.fecha.Date.ToString() == date &&
-                    r.idRecolector == idRecolector &&
-                    r.idDonante == idDonante &&
-                    r.cobrado == 0)
-                .Count();
-        }
+            if (recibo == null) return HttpStatusCode.BadRequest;
 
+            recibo.orden = pos;
+            await sqlContext.SaveChangesAsync();
+
+            return HttpStatusCode.OK;
+        }
     }
 }

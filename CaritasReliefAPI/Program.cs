@@ -1,13 +1,12 @@
 using CaritasReliefAPI;
 using CaritasReliefAPI.DBContext;
 using CaritasReliefAPI.Extensions;
+using Microsoft.AspNetCore.Authentication.Certificate;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
+using Microsoft.AspNetCore.Server.Kestrel.Https;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.IdentityModel.Tokens;
-using System.Data.Entity.Infrastructure;
-using System.Net;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -16,10 +15,16 @@ var config = builder.Configuration;
 var key = config["Jwt:key"];
 var audience = config["Jwt:audience"];
 var issuer = config["Jwt:issuer"];
-var connString = config["ConnectionStrings:SQLServer"];
+var connString = config["ConnectionStrings:SQLLocal"];
 
 builder.Services
     .AddDbContextPool<SQLContext>(op => op.UseSqlServer(connString));
+
+builder.Services.Configure<KestrelServerOptions>(options =>
+{
+    options.ConfigureHttpsDefaults(options =>
+        options.ClientCertificateMode = ClientCertificateMode.RequireCertificate);
+});
 
 builder.Services
     .AddGraphQL()
@@ -36,6 +41,10 @@ builder.Services
         options.AddPolicy("admin", policy => policy.RequireRole("admin"));
     });
 
+
+builder.Services.
+    AddAuthentication(CertificateAuthenticationDefaults.AuthenticationScheme)
+    .AddCertificate();
 
 builder.Services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

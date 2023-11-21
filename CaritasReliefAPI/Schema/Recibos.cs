@@ -27,10 +27,19 @@ namespace CaritasReliefAPI.Schema
 
         public bool activo { get; set; }
 
+        public int orden { get; set; }
+
         [ForeignKey("idRecolector")]
         public Recolectores recolector { get; set; }
 
         [ForeignKey("idDonante")]
         public Donantes donante { get; set; }
+    }
+
+    public enum EstadoRecibo
+    {
+        fallido,
+        cobrado,
+        pendiente
     }
 }
