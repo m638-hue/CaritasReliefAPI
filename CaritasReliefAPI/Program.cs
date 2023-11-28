@@ -15,10 +15,12 @@ var config = builder.Configuration;
 var key = config["Jwt:key"];
 var audience = config["Jwt:audience"];
 var issuer = config["Jwt:issuer"];
-var connString = config["ConnectionStrings:SQLLocal"];
+var connString = config["ConnectionStrings:SQLServer"];
 
 builder.Services
     .AddDbContextPool<SQLContext>(op => op.UseSqlServer(connString));
+
+builder.Services.AddControllers();
 
 builder.Services.Configure<KestrelServerOptions>(options =>
 {
@@ -63,12 +65,12 @@ builder.Services
 
 var app = builder.Build();
 
-//app.UseHttpsRedirection()
+app.UseRouting();
 
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.UseRouting();
+app.MapControllers();
 app.MapGraphQL();
 
 
