@@ -1,10 +1,7 @@
 using CaritasReliefAPI;
 using CaritasReliefAPI.DBContext;
 using CaritasReliefAPI.Extensions;
-using Microsoft.AspNetCore.Authentication.Certificate;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Server.Kestrel.Core;
-using Microsoft.AspNetCore.Server.Kestrel.Https;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
@@ -15,16 +12,10 @@ var config = builder.Configuration;
 var key = config["Jwt:key"];
 var audience = config["Jwt:audience"];
 var issuer = config["Jwt:issuer"];
-var connString = config["ConnectionStrings:SQLLocal"];
+var connString = config["ConnectionStrings:SQLServer"];
 
 builder.Services
     .AddDbContextPool<SQLContext>(op => op.UseSqlServer(connString));
-
-builder.Services.Configure<KestrelServerOptions>(options =>
-{
-    options.ConfigureHttpsDefaults(options =>
-        options.ClientCertificateMode = ClientCertificateMode.RequireCertificate);
-});
 
 builder.Services
     .AddGraphQL()
@@ -41,11 +32,6 @@ builder.Services
         options.AddPolicy("admin", policy => policy.RequireRole("admin"));
     });
 
-
-builder.Services.
-    AddAuthentication(CertificateAuthenticationDefaults.AuthenticationScheme)
-    .AddCertificate();
-
 builder.Services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(x =>
@@ -61,16 +47,17 @@ builder.Services
         };
     });
 
+builder.Services.AddControllers();
+
 var app = builder.Build();
 
-//app.UseHttpsRedirection()
-
-app.UseAuthentication();
-app.UseAuthorization();
+app.UseHttpsRedirection();
 
 app.UseRouting();
+app.UseAuthentication();
+app.UseAuthorization();
 app.MapGraphQL();
 
-
+app.MapControllers();
 
 app.Run();
